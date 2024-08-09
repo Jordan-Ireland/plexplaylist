@@ -1,11 +1,9 @@
 from flask import Flask, jsonify, render_template, request
 from plexapi.server import PlexServer
 from plexapi.library import ShowSection
-import json
 import os.path
 from datetime import datetime, timedelta
 import sys
-from apscheduler.triggers.combining import OrTrigger
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.schedulers.background import BackgroundScheduler
 import database_controller as db
@@ -48,10 +46,20 @@ def check_playlist_watched(regenerate = True):
                 else:
                     episodes_to_add_back.append(actualEpisode)
             except Exception as e:
-                if(DEBUG):
-                    print("Failed to get lastViewedAt, removing from playlist.", e, file=sys.stdout)              
-                db.update_last_watched(episode[0], datetime.now().strftime("%Y%m%d"))
-                db.remove_from_current_playlist(episode[0])
+                try:
+                    actualEpisode = allActualShows[str(dbepisode[4])].episode(title=dbepisode[1])
+                    lastViewedAt = actualEpisode.lastViewedAt
+                    if lastViewedAt and lastViewedAt >= datetime.now() - timedelta(days=1):
+                        if(DEBUG):
+                            print("Episode " + dbepisode[1] + " s" + str(dbepisode[2]) + " e" + str(dbepisode[3]) + " was watched.", file=sys.stdout)                
+                        db.update_last_watched(episode[0], datetime.now().strftime("%Y%m%d"))
+                        db.update_can_be_picked(episode[0], False)
+                        db.remove_from_current_playlist(episode[0])
+                except Exception as ex:
+                    if(DEBUG):
+                        print("Failed to get lastViewedAt, removing from playlist.", ex, file=sys.stdout)              
+                    db.update_last_watched(episode[0], datetime.now().strftime("%Y%m%d"))
+                    db.remove_from_current_playlist(episode[0])
         if(regenerate):
             generatePlaylist(None)
         
@@ -204,8 +212,13 @@ def generatePlaylist(wantedShows):
                 print("Adding episode to playlist: " + episode[0] + " -- " + episode[1] + " s" + str(episode[2]) + " e" + str(episode[3]), file=sys.stdout)
             aEpisodes.append(allActualShows[str(episode[4])].episode(season=episode[2], episode=episode[3]))
         except Exception as e:
-            if(DEBUG):
-                print("Failed to add episode", e, file=sys.stdout)
+            try:
+                aEpisodes.append(allActualShows[str(episode[4])].episode(title=episode[1]))
+            except Exception as ex:
+                if(DEBUG):
+                    print("Failed to add episode", ex, file=sys.stdout)              
+                db.update_last_watched(episode[0], datetime.now().strftime("%Y%m%d"))
+                db.remove_from_current_playlist(episode[0])
     found_playlist.addItems(aEpisodes)
 
 @app.route("/getcurrentplaylist", methods=['GET'])

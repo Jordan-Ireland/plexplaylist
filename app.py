@@ -11,7 +11,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import database_controller as db
 import os
 
-DEBUG = os.environ.get('DEBUG', False)
+DEBUG = bool(os.environ.get('DEBUG', False))
 
 app = Flask(__name__)
 

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plex TV Guide Playlist</title>
+    <script src="/static/js/fontawesome.min.js"></script>
+    <script src="/static/js/jquery.js"></script>
+    <script src="/static/js/popper.min.js"></script>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <script src="/static/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/static/css/index.css">
+    <script src="/static/js/index.js"></script>
+</head>
+
+<body>
+    <h1>Plex TV Guide Playlist</h1>
+    <div class="loading" id="loading">
+        <div class="spinner-border text-primary" role="status">
+            <img src="/static/imgs/loading.gif">
+        </div>
+    </div>
+    <div class="selectionBoxes">
+        <h3 class="left-title">Available Shows</h3>
+        <input type="text" id="allShowSearch" onkeyup="allShowSearch()" placeholder="Search for shows..">
+        <div class="panel-group" role="tablist" id="showList" style="height:350px;overflow-y: auto;overflow-x: hidden;">
+            {% for show in shows %}
+            <div class="available-show" data-value="{{show.id}}" class="panel panel-default">
+                <div class="panel-heading" role="tab">
+                    <h4 class="panel-title">
+                        {{show.title}}
+                    </h4>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <h3 class="right-title">Selected Playlist Shows</h3>
+        <div id="selectedShows">
+            <div id="selectedShowsPanel" class="panel-group" role="tablist"></div>  
+        </div>
+
+        <!-- <div style="grid-column: 2; grid-row: 1 / 2;">
+            <select size="10" id="selectedShows" style="width:100%;height:400px" onclick="removeShow()"></select>
+        </div> -->
+
+        <button id="generatePlaylist" class="btn" onclick="generatePlaylist()">Update Shows</button>
+    </div>
+    <div id="playlistContainer">
+        <h2>Playlist</h2>
+        <div id="playlist" style="overflow-y: auto;overflow-x: hidden;">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">Show</th>
+                        <th scope="col">Season</th>
+                        <th scope="col">Episode</th>
+                        <th scope="col">Title</th>
+                    </tr>
+                </thead>
+                <tbody id="playlistBody">
+                </tbody>
+            </table>
+        </div>
+        <button id="regeneratePlaylist" class="btn" style="margin-top: 25px;" onclick="regeneratePlaylist()">Regenerate Playlist</button>
+</body>
+
+</html>

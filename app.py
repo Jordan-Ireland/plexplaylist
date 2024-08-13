@@ -250,7 +250,7 @@ def getPlaylist():
             found_playlist = playlist
 
     if(found_playlist is None):
-        found_playlist = plex.createPlaylist(PLAYLIST_TITLE)
+        found_playlist = plex.createPlaylist(PLAYLIST_TITLE, items=[allActualShows[allshows[0]['id']]], smart=False)
 
     return found_playlist
 
